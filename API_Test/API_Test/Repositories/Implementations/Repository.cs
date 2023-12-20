@@ -1,23 +1,20 @@
-﻿using API_Test.DAL;
-using API_Test.Entities;
-using API_Test.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-
+﻿
 namespace API_Test.Repositories.Implementations
 {
-    public class Repository : IRepository
+    public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly AppDbContext? _context;
+        private readonly DbSet<T> _table;
 
         public Repository(AppDbContext? context)
         {
             _context = context;
+            _table = _context.Set<T>();
         }
 
-        public async Task<IQueryable<Category>> GetAll(Expression<Func<Category, bool>>? func = null, params string[]? includes)
+        public IQueryable<T> GetAll(Expression<Func<T, bool>>? func = null, Expression<Func<T, object>>? orderby = null, bool isDisting = false, params string[] includes)
         {
-            IQueryable<Category> query = _context.Categories.AsNoTracking();
+            IQueryable<T> query = _table.AsNoTracking();
 
             if(func != null)
             {
@@ -32,12 +29,17 @@ namespace API_Test.Repositories.Implementations
                 }
             }
 
+            if(orderby != null)
+            {
+                query = isDisting? query.OrderByDescending(orderby) : query.OrderBy(orderby);
+            }
+
             return query;
         }
 
-        public Task<Category> GetByIdAsync(int id, params string[]? includes)
+        public Task<T> GetByIdAsync(int id, params string[] includes)
         {
-            IQueryable<Category> query = _context.Categories;
+            IQueryable<T> query = _table.AsNoTracking();
 
             if (includes != null)
             {
@@ -50,19 +52,19 @@ namespace API_Test.Repositories.Implementations
             return query.FirstOrDefaultAsync(c=>c.Id==id);
         }
 
-        public async Task Create(Category category)
+        public async Task Create(T entity)
         {
-            await _context.Categories.AddAsync(category);
+            await _table.AddAsync(entity);
         }
 
-        public async void Update(Category category)
+        public void Update(T entity)
         {
-            _context.Categories.Update(category);
+            _table.Update(entity);
         }
 
-        public void Delete(Category category)
+        public void Delete(T entity)
         {
-            _context.Categories.Remove(category);
+            _table.Remove(entity);
         }
 
         public async Task SaveChangesAsync()

@@ -1,8 +1,9 @@
-﻿namespace API_Test.Entities
+﻿using API_Test.Entities.Base;
+
+namespace API_Test.Entities
 {
-    public class Category
+    public class Category:BaseEntity
     {
-        public int Id { get; set; }
         public string Name { get; set; }
     }
 }

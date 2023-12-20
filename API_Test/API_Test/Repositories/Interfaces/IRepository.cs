@@ -1,19 +1,17 @@
-﻿using API_Test.Entities;
-using System.Linq.Expressions;
-
+﻿
 namespace API_Test.Repositories.Interfaces
 {
-    public interface IRepository
+    public interface IRepository<T> where T : BaseEntity
     {
-        Task<IQueryable<Category>> GetAll(Expression<Func<Category,bool>>? func=null, params string[]? includes);
+        IQueryable<T> GetAll(Expression<Func<T,bool>>? func=null, Expression<Func<T, object>>? orderby = null, bool isDisting=false, params string[] includes);
 
-        Task<Category> GetByIdAsync(int id, params string[]? includes);
+        Task<T> GetByIdAsync(int id, params string[] includes);
 
-        Task Create(Category category);
+        Task Create(T entity);
 
-        void Update(Category category);
+        void Update(T entity);
 
-        void Delete(Category category);
+        void Delete(T entity);
 
         Task SaveChangesAsync();
 
